@@ -1,0 +1,11 @@
+{
+  "name": "TrueSafe",
+  "short_name": "TrueSafe",
+  "description": "Scam shield and Urimai civic helper",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#050b1f",
+  "theme_color": "#050b1f",
+  "icons": [{ "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
