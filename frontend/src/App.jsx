@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Component, useCallback, useEffect, useState } from 'react';
+import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import Aurora from './components/Aurora.jsx';
 import GlowCursor from './components/GlowCursor.jsx';
 import SearchOverlay from './components/SearchOverlay.jsx';
@@ -20,7 +20,46 @@ import Legal from './pages/Legal.jsx';
 import Settings from './pages/Settings.jsx';
 import MyFamily from './pages/MyFamily.jsx';
 
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center p-6 text-center space-y-4">
+          <h1 className="text-2xl font-bold text-accent">Something went wrong</h1>
+          <p className="text-sm text-muted">{this.state.error?.message || 'Unexpected render error'}</p>
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.removeItem('truesafe:demo');
+              window.location.reload();
+            }}
+            className="btn-primary"
+          >
+            Reset Session &amp; Reload
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
+  return (
+    <ErrorBoundary>
+      <AppInner />
+    </ErrorBoundary>
+  );
+}
+
+function AppInner() {
   const [authed, setAuthed] = useState(null);
   const [search, setSearch] = useState(false);
   const [booted, setBooted] = useState(false);
@@ -102,7 +141,7 @@ export default function App() {
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <nav aria-label="Legal" className="flex flex-wrap gap-4">
                   {['privacy', 'terms', 'refund', 'cookies'].map((d) => (
-                    <a key={d} className="underline" href={`/legal/${d}`}>{d[0].toUpperCase() + d.slice(1)}</a>
+                    <Link key={d} className="underline" to={`/legal/${d}`}>{d[0].toUpperCase() + d.slice(1)}</Link>
                   ))}
                 </nav>
                 <button

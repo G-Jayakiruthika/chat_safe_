@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const BOOT_LOGS = [
@@ -14,10 +14,12 @@ export default function Preloader({ onComplete }) {
   const [progress, setProgress] = useState(0);
   const [logIndex, setLogIndex] = useState(0);
   const [done, setDone] = useState(false);
+  const doneRef = useRef(onComplete);
+  doneRef.current = onComplete;
 
   useEffect(() => {
     const start = Date.now();
-    const duration = 1600; // 1.6s smooth load
+    const duration = 1200;
 
     const timer = setInterval(() => {
       const elapsed = Date.now() - start;
@@ -31,13 +33,13 @@ export default function Preloader({ onComplete }) {
         clearInterval(timer);
         setTimeout(() => {
           setDone(true);
-          setTimeout(() => onComplete?.(), 400);
-        }, 200);
+          setTimeout(() => doneRef.current?.(), 350);
+        }, 150);
       }
     }, 35);
 
     return () => clearInterval(timer);
-  }, [onComplete]);
+  }, []);
 
   return (
     <AnimatePresence>
