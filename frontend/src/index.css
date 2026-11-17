@@ -6,6 +6,19 @@
 :root[data-mode='dark']  { --fg: 245 249 255; --muted: 195 207 240; }
 :root[data-mode='light'] { --fg: 10 21 48;    --muted: 52 65 95; }
 
+/* Dynamic Theme Presets (SkillForge AI & Chat_Safe) */
+:root[data-palette='ocean'] { --accent: 34 211 238; --a2: 52 211 153; --a3: 251 191 36; }
+:root[data-palette='violet'] { --accent: 139 92 255; --a2: 255 62 165; --a3: 60 240 255; }
+:root[data-palette='sunset'] { --accent: 251 146 60; --a2: 244 63 94; --a3: 251 191 36; }
+:root[data-palette='forest'] { --accent: 52 211 153; --a2: 34 211 238; --a3: 163 230 53; }
+:root[data-palette='rose'] { --accent: 244 63 94; --a2: 251 191 36; --a3: 168 85 247; }
+:root[data-palette='slate'] { --accent: 148 163 184; --a2: 56 189 248; --a3: 203 213 225; }
+
+/* Minimalist Mode (Calm, Flat, High-Contrast) */
+html.minimal-mode canvas:not(#scan-canvas) { opacity: 0.15 !important; }
+html.minimal-mode .backdrop-blur-xl { backdrop-filter: none !important; }
+html.minimal-mode * { transition-duration: 0.05s !important; }
+
 /* ---- State palettes: BlueDragon(neutral) / Lionfish(scam) / PeacockMantis(safe) / Starfish(civic) / MoonJellyfish(voice) ----
    Every accent/onaccent pair is >= 7:1 (WCAG AAA). Values are RGB channels. */
 :root[data-mode='dark'][data-state='neutral']  { --bg: 5 11 31;  --accent: 143 180 255; --onaccent: 4 16 46;   --a2: 192 200 214; --a3: 40 80 220; }

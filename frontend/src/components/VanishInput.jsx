@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp, Mic, MicOff } from 'lucide-react';
+import { INDIAN_LANGUAGES } from '../lib/languages.js';
 
-const SR_LANG = { en: 'en-IN', ta: 'ta-IN', hi: 'hi-IN' };
+const getSrLang = (code) => {
+  const match = INDIAN_LANGUAGES.find((l) => l.code === code);
+  return match?.srCode || 'en-IN';
+};
 
 /** Aceternity "Vanish Input": on submit, the text dissolves into particles. Includes a Mic (Web Speech API) button. */
 export default function VanishInput({ onSubmit, lang = 'en', busy }) {
@@ -52,7 +56,7 @@ export default function VanishInput({ onSubmit, lang = 'en', busy }) {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { alert('Voice input is not supported in this browser. Please type instead.'); return; }
     if (listening) { recog.current?.stop(); return; }
-    const r = new SR(); r.lang = SR_LANG[lang]; r.interimResults = true; r.continuous = false;
+    const r = new SR(); r.lang = getSrLang(lang); r.interimResults = true; r.continuous = false;
     r.onresult = (ev) => setValue(Array.from(ev.results).map((x) => x[0].transcript).join(' '));
     r.onend = () => setListening(false); r.onerror = () => setListening(false);
     recog.current = r; setListening(true); r.start();

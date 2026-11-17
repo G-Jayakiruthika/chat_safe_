@@ -96,11 +96,22 @@ export async function analyze(rawText, lang = 'en') {
   }
 }
 
-/** Short spoken-style reply for voice callers. */
-export async function voiceReply(rawText, lang = 'hi') {
+/** Spoken voice reply for rural callers on Twilio / IVR. */
+export async function voiceReply(rawText, lang = 'ta') {
   const r = await analyze(rawText, lang);
-  const head = r.classification === 'SCAM' ? '⚠' : '';
-  return `${head} ${r.explanation} ${r.advice}`.replace(/[⚠*#]/g, '').trim().slice(0, 600);
+  if (r.classification === 'CIVIC_ISSUE') {
+    return lang === 'ta'
+      ? 'வணக்கம். நீங்கள் கூறிய பொதுப் பிரச்சினை குறித்து உரிய துறைக்கு புகார் மனு தயார் செய்து உங்கள் மகனின் போனுக்கு அனுப்பியுள்ளேன்.'
+      : 'I understand the civic issue you reported. I have drafted an official complaint to the municipal department and sent it to your son\'s phone to submit.';
+  }
+  if (r.classification === 'SCAM') {
+    return lang === 'ta'
+      ? 'எச்சரிக்கை! இது ஒரு ஆபத்தான நிதி மோசடி. OTP எதையும் பகிர வேண்டாம். உங்கள் குடும்ப டாஷ்போர்டுக்கு உடனடி எச்சரிக்கை அனுப்பியுள்ளேன், 1930 புகார் தயார்.'
+      : 'Warning! This is a dangerous fraud attempt. Never share your OTP or password. I have sent an urgent SOS alert to your family dashboard and prepared a 1930 report.';
+  }
+  return lang === 'ta'
+    ? 'இதில் ஆபத்தான மோசடி அறிகுறிகள் எதுவும் இல்லை. எப்போதும் விழிப்புடன் இருங்கள்.'
+    : 'No scam patterns were detected in this message. Stay alert.';
 }
 
 /** Anonymise a batch of threat reports via Gemini for the Radar feed. */

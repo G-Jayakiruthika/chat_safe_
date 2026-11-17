@@ -4,6 +4,8 @@ import Aurora from './components/Aurora.jsx';
 import GlowCursor from './components/GlowCursor.jsx';
 import SearchOverlay from './components/SearchOverlay.jsx';
 import CookieBanner from './components/CookieBanner.jsx';
+import Preloader from './components/Preloader.jsx';
+import AppearanceModal from './components/AppearanceModal.jsx';
 import { Header, BottomNav } from './components/Nav.jsx';
 import { api } from './lib/api.js';
 import { useTheme } from './lib/theme.jsx';
@@ -21,31 +23,67 @@ import MyFamily from './pages/MyFamily.jsx';
 export default function App() {
   const [authed, setAuthed] = useState(null);
   const [search, setSearch] = useState(false);
+  const [booted, setBooted] = useState(false);
+  const [appearance, setAppearance] = useState(false);
+  const [lang, setLang] = useState(() => localStorage.getItem('ts_lang') || 'en');
   const { setState } = useTheme();
   const loc = useLocation();
 
-  useEffect(() => { api.me().then(() => setAuthed(true)).catch(() => setAuthed(false)); }, []);
   useEffect(() => {
-    const k = (e) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setSearch((s) => !s); } };
-    addEventListener('keydown', k); return () => removeEventListener('keydown', k);
+    api.me().then(() => setAuthed(true)).catch(() => setAuthed(false));
   }, []);
-  // Leaving the scanner resets the sea-creature state back to BlueDragon.
-  useEffect(() => { if (!loc.pathname.startsWith('/scan')) setState((s) => (s === 'voice' ? s : 'neutral')); }, [loc.pathname, setState]);
+
+  useEffect(() => {
+    const k = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearch((s) => !s);
+      }
+    };
+    addEventListener('keydown', k);
+    return () => removeEventListener('keydown', k);
+  }, []);
+
+  // Leaving the scanner resets the sea-creature state back to BlueDragon
+  useEffect(() => {
+    if (!loc.pathname.startsWith('/scan')) {
+      setState((s) => (s === 'voice' ? s : 'neutral'));
+    }
+  }, [loc.pathname, setState]);
+
   const closeSearch = useCallback(() => setSearch(false), []);
 
-  if (authed === null) return <div role="status" className="grid min-h-screen place-items-center text-xl">Loading TrueSafe…</div>;
+  const handleLangChange = (newLang) => {
+    setLang(newLang);
+    localStorage.setItem('ts_lang', newLang);
+  };
+
+  if (authed === null) {
+    return <div role="status" className="grid min-h-screen place-items-center text-xl font-mono">Loading TrueSafe...</div>;
+  }
+
   const publicLegal = loc.pathname.startsWith('/legal');
 
   return (
     <>
+      <Preloader onComplete={() => setBooted(true)} />
       <a href="#main" className="skip-link">Skip to content</a>
       <Aurora />
       <GlowCursor />
+
       {!authed && !publicLegal ? (
         <main id="main"><Login onAuthed={() => setAuthed(true)} /></main>
       ) : (
         <>
-          {authed && <Header onSearch={() => setSearch(true)} onLogout={() => setAuthed(false)} />}
+          {authed && (
+            <Header
+              onSearch={() => setSearch(true)}
+              onLogout={() => setAuthed(false)}
+              onOpenAppearance={() => setAppearance(true)}
+              currentLang={lang}
+            />
+          )}
+
           <main id="main" className="mx-auto min-h-screen max-w-5xl px-4 pb-32 pt-6">
             <Routes>
               <Route path="/" element={<Radar />} />
@@ -59,17 +97,38 @@ export default function App() {
               <Route path="/legal/:doc" element={<Legal />} />
               <Route path="*" element={<Radar />} />
             </Routes>
+
             <footer className="mt-16 border-t border-fg/20 pt-6 text-sm text-muted">
-              <nav aria-label="Legal" className="flex flex-wrap gap-4">
-                {['privacy', 'terms', 'refund', 'cookies'].map((d) => <a key={d} className="underline" href={`/legal/${d}`}>{d[0].toUpperCase() + d.slice(1)}</a>)}
-              </nav>
-              <address className="mt-3 not-italic">TrueSafe · Operator: [Registered legal entity name – to be completed before launch] · [Registered address] · grievance@truesafe.example · Cybercrime helpline: 1930</address>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <nav aria-label="Legal" className="flex flex-wrap gap-4">
+                  {['privacy', 'terms', 'refund', 'cookies'].map((d) => (
+                    <a key={d} className="underline" href={`/legal/${d}`}>{d[0].toUpperCase() + d.slice(1)}</a>
+                  ))}
+                </nav>
+                <button
+                  onClick={() => setAppearance(true)}
+                  className="rounded-full border border-fg/20 px-3 py-1 text-xs font-semibold hover:border-accent"
+                >
+                  ⚙ Display & Languages ({lang.toUpperCase()})
+                </button>
+              </div>
+              <address className="mt-3 not-italic text-xs text-muted">
+                TrueSafe + Urimai v2.0 · PromptWars X Noor AITH · Google Gemini 3.8 / 2.0 Multimodal · Cybercrime helpline: 1930 · National Grievance: CPGRAMS
+              </address>
             </footer>
           </main>
+
           {authed && <BottomNav />}
         </>
       )}
+
       <SearchOverlay open={search} onClose={closeSearch} />
+      <AppearanceModal
+        open={appearance}
+        onClose={() => setAppearance(false)}
+        currentLang={lang}
+        onLangChange={handleLangChange}
+      />
       <CookieBanner />
     </>
   );

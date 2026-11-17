@@ -6,6 +6,10 @@ export function addHistory(item) {
   localStorage.setItem(KEY, JSON.stringify(list));
   window.dispatchEvent(new Event('ts-history'));
 }
+export const clearHistory = () => {
+  localStorage.removeItem(KEY);
+  window.dispatchEvent(new Event('ts-history'));
+};
 export const clearLocalData = () => {
   ['ts_history', 'ts_report', 'ts_streak', 'ts_family', 'ts_apps', 'ts_cookie'].forEach((k) => localStorage.removeItem(k));
 };
